@@ -47,6 +47,7 @@ import { logger } from "../utils/logger.utils";
 import { JwksController } from "../controllers/jwks.controller";
 import { metricsRegistry } from "../config/metrics";
 import { monitoringConfig } from "../config/monitoring.config";
+import storageCostsRoutes from "./storage-costs.routes";
 
 const router = Router();
 
@@ -98,6 +99,7 @@ router.use("/developer", developerRoutes);
 router.use("/subscriptions", subscriptionRoutes);
 router.use("/tax", taxRoutes);
 router.use("/oracle", oracleRoutes);
+router.use("/admin/recordings", storageCostsRoutes);
 router.use("/", exportRoutes);
 
 // JWKS public endpoint — no auth required
