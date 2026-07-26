@@ -504,6 +504,18 @@ export const BookingsService = {
       });
     });
 
+    // Fire-and-forget: Increment real-time analytics counters and do targeted view refresh
+    import("./analytics-pipeline.service").then(({ AnalyticsPipelineService }) => {
+      AnalyticsPipelineService.refreshOnBookingCompleted({ bookingId }).catch(
+        (err) => {
+          logger.warn("Failed to run incremental analytics refresh on booking completion", {
+            bookingId,
+            error: err,
+          });
+        },
+      );
+    });
+
     return updated;
   },
 

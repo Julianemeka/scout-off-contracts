@@ -3,6 +3,7 @@ import { queueConnection } from '../queues/queue.config';
 import { logger } from '../utils/logger';
 import { AdvancedAnalyticsService } from '../services/advanced-analytics.service';
 import { CacheService } from '../services/cache.service';
+import { AnalyticsPipelineService } from '../services/analytics-pipeline.service';
 import pool from '../config/database';
 
 // Analytics event types
@@ -185,15 +186,24 @@ async function updateProcessingMetrics(table: string, operation: string): Promis
 
 // Scheduled jobs for analytics maintenance
 export const AnalyticsScheduledJobs = {
-  // Refresh materialized views every 15 minutes
+  // Refresh materialized views every 15 minutes using CONCURRENT refresh (non-blocking)
   refreshViews: {
     schedule: '*/15 * * * *',
     handler: async () => {
       try {
-        logger.info('Starting scheduled analytics views refresh');
-        await AdvancedAnalyticsService.refreshAnalytics();
+        logger.info('Starting scheduled analytics views concurrent refresh');
+        const results = await AnalyticsPipelineService.refreshMaterializedViews();
+        const failed = results.filter(r => !r.success);
+        if (failed.length > 0) {
+          logger.warn('Some views failed to refresh', {
+            failed: failed.map(r => ({ view: r.view, error: r.error })),
+          });
+        }
         await CacheInvalidationService.onViewsRefreshed();
-        logger.info('Scheduled analytics views refresh completed');
+        logger.info('Scheduled analytics views refresh completed', {
+          succeeded: results.filter(r => r.success).length,
+          failed: failed.length,
+        });
       } catch (error) {
         logger.error('Scheduled analytics views refresh failed', { error });
         throw error;

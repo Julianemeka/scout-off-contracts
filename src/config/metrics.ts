@@ -214,3 +214,15 @@ export const webhookCircuitBreakerState = new Gauge<string>({
   labelNames: ["url_hash"],
   registers: [metricsRegistry],
 });
+
+// ─── Analytics Pipeline ───────────────────────────────────────────────────────
+
+/**
+ * Seconds since the last successful REFRESH MATERIALIZED VIEW CONCURRENTLY
+ * across all analytics views. Alert fires when lag > 1200 s (20 minutes).
+ */
+export const mvRefreshLagSeconds = new Gauge<string>({
+  name: "mv_refresh_lag_seconds",
+  help: "Seconds since the last successful analytics materialized view refresh. Alert threshold: 1200 s (20 min).",
+  registers: [metricsRegistry],
+});
