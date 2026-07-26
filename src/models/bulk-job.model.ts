@@ -1,6 +1,6 @@
 import pool from "../config/database";
 
-export type BulkJobType = "users_import" | "payments_process";
+export type BulkJobType = "users_import" | "payments_process" | "mentor_import";
 export type BulkJobStatus = "pending" | "processing" | "completed" | "failed";
 
 export interface BulkJobRecord {
